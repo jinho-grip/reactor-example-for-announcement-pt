@@ -6,19 +6,21 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class C2_CustomMono {
+public class C3_CustomFlux {
 
-    abstract static class CustomMono implements Flow.Publisher<Integer> {
+    abstract static class CustomFlux implements Flow.Publisher<Integer> {
 
-        public static CustomMono just(Integer data) {
-            return new CustomMono() {
+        public static CustomFlux just(Integer... data) {
+            return new CustomFlux() {
                 @Override
                 public void subscribe(Flow.Subscriber<? super Integer> subscriber) {
                     subscriber.onSubscribe(new Subscription() {
+
                         @Override
                         public void request(long n) {
-                            subscriber.onNext(data);
-                            subscriber.onComplete();
+                            for (Integer item : data) {
+                                subscriber.onNext(item);
+                            }
                         }
 
                         @Override
@@ -29,10 +31,10 @@ public class C2_CustomMono {
             };
         }
 
-        public CustomMono map(Function<Integer, Integer> mapper) {
-            CustomMono upstream = this;
+        public CustomFlux map(Function<Integer, Integer> mapper) {
+            CustomFlux upstream = this;
 
-            return new CustomMono() {
+            return new CustomFlux() {
                 @Override
                 public void subscribe(Flow.Subscriber<? super Integer> subscriber) {
                     upstream.subscribe(new Flow.Subscriber<>() {
@@ -60,10 +62,10 @@ public class C2_CustomMono {
             };
         }
 
-        public CustomMono filter(Predicate<Integer> predicate) {
-            CustomMono upstream = this;
+        public CustomFlux filter(Predicate<Integer> predicate) {
+            CustomFlux upstream = this;
 
-            return new CustomMono() {
+            return new CustomFlux() {
                 @Override
                 public void subscribe(Flow.Subscriber<? super Integer> subscriber) {
                     upstream.subscribe(new Flow.Subscriber<>() {
@@ -74,11 +76,7 @@ public class C2_CustomMono {
 
                         @Override
                         public void onNext(Integer item) {
-                            if (predicate.test(item)) {
-                                subscriber.onNext(item);
-                            } else {
-                                subscriber.onComplete();
-                            }
+                            if (predicate.test(item)) subscriber.onNext(item);
                         }
 
                         @Override
@@ -95,10 +93,10 @@ public class C2_CustomMono {
             };
         }
 
-        public CustomMono peek(Consumer<Integer> consumer) {
-            CustomMono upstream = this;
+        public CustomFlux peek(Consumer<Integer> consumer) {
+            CustomFlux upstream = this;
 
-            return new CustomMono() {
+            return new CustomFlux() {
                 @Override
                 public void subscribe(Flow.Subscriber<? super Integer> subscriber) {
                     upstream.subscribe(new Flow.Subscriber<>() {
@@ -129,7 +127,6 @@ public class C2_CustomMono {
 
         public void subscribe(Consumer<? super Integer> consumer) {
             this.subscribe(new Flow.Subscriber<>() {
-                @Override
                 public void onSubscribe(Subscription s) {
                     s.request(Long.MAX_VALUE);
                 }
@@ -151,7 +148,7 @@ public class C2_CustomMono {
     }
 
     public static void main(String[] args) {
-        CustomMono.just(2)
+        CustomFlux.just(1, 2, 3, 4, 5)
                 .peek(data -> System.out.println("원본: " + data))
                 .filter(data -> data % 2 == 0)
                 .peek(data -> System.out.println("  -> 필터 통과: " + data))

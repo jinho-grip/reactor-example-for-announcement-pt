@@ -31,7 +31,7 @@ public class D1_SimpleWebflux {
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
 
-        serverBootstrap.group(sharedGroup, sharedGroup)
+        serverBootstrap.group(sharedGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -53,7 +53,7 @@ class SimpleWebfluxHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) {
-        Mono<String> asyncMono = controller.process(msg);
+        Mono<String> asyncMono = controller.handle(msg);
 
         asyncMono.subscribe(
                 result -> {

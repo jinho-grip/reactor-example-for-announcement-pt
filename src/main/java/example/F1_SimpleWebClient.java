@@ -16,18 +16,17 @@ import reactor.core.publisher.MonoSink;
 
 public class F1_SimpleWebClient {
 
-    private final EventLoopGroup group;
     private final Bootstrap baseBootstrap;
 
     public F1_SimpleWebClient(EventLoopGroup sharedGroup) {
-        this.group = sharedGroup;
         this.baseBootstrap = new Bootstrap()
-                .group(this.group)
+                .group(sharedGroup)
                 .channel(NioSocketChannel.class);
     }
 
     public Mono<String> sendMessage(String host, int port, String message) {
         return Mono.create(sink -> {
+            // TODO : 왜 클론하는지 알아보기
             Bootstrap callBootstrap = baseBootstrap.clone();
             callBootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override

@@ -9,7 +9,7 @@ public class Z3_Controller {
         this.webClient = webClient;
     }
 
-    public Mono<String> process(String msg) {
+    public Mono<String> handle(String msg) {
         Mono<String> mono = webClient.sendMessage("localhost", 8090, msg);
         return mono.map(
                 result -> "Processed: " + result

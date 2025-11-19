@@ -16,12 +16,11 @@ public class B1_Publisher {
                                 for (int i = 0; i < n; i++) {
                                     subscriber.onNext(i);
                                 }
-                                subscriber.onComplete();
                             }
 
                             @Override
                             public void cancel() {
-
+                                subscriber.onComplete();
                             }
                         }
                 );
