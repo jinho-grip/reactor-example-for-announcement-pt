@@ -17,16 +17,14 @@ import io.netty.util.CharsetUtil;
 import java.util.Random;
 
 class E2_NettyServer {
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
+    private EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
     private Channel channel;
 
     public ChannelFuture start(int port) throws InterruptedException {
-        bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup();
+        eventLoopGroup = new NioEventLoopGroup();
 
         ServerBootstrap b = new ServerBootstrap();
-        b.group(bossGroup, workerGroup)
+        b.group(eventLoopGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -48,11 +46,8 @@ class E2_NettyServer {
         if (channel != null) {
             channel.close();
         }
-        if (workerGroup != null) {
-            workerGroup.shutdownGracefully();
-        }
-        if (bossGroup != null) {
-            bossGroup.shutdownGracefully();
+        if (eventLoopGroup != null) {
+            eventLoopGroup.shutdownGracefully();
         }
     }
 
